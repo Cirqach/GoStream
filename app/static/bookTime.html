@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a time</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+
+        .button-container {
+            display: flex; /* Arrange buttons in a row */
+            gap: 300px;   /* Space between buttons */
+            justify-content: center; /* Center the buttons horizontally */
+            align-items: center; /* Center the buttons vertically */
+            text-align: center;
+        }
+
+        header {
+            background-color: #333; /* Dark background for header */
+            color: white;
+            padding: 10px 0; /* Add some padding */
+            text-align: center;
+            width: 100%; /* Make header full width */
+            position: fixed; /* Fix the header to the top */
+            top: 0; /* Position it at the top */
+            z-index: 10; /* Ensure it stays on top of other content */
+            display: flex;
+            align-items: center; /* Center the header content vertically */
+            justify-content: center; /* Center the header content horizontally */
+        }
+
+        main {
+            padding: 20px;
+            text-align: center;
+            margin-top: 60px; /* Add space for the fixed header */
+        }/* In your bookTime.html's <style> tag */
+input[type="date"],
+input[type="time"],
+input[type="range"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#duration-value {
+    margin-left: 10px;
+}
+
+#bookButton {
+    padding: 15px 30px;
+    font-size: 18px;
+    background-color: #4CAF50; /* Green */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="button-container">
+            <button>Watch</button>
+            <button>Book a time</button>
+        </div>
+    </header>
+
+    <main>
+        <h2>Book a Time</h2>
+
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date">
+
+        <label for="time">Time:</label>
+        <input type="time" id="time" name="time">
+
+        <label for="duration">Duration (minutes):</label><span id="duration-value">10</span>
+        <input type="range" id="duration" name="duration" min="1" max="40" value="10">
+        
+
+        <label for="file">Upload File:</label>
+        <input type="file" id="file" name="file">
+        <br>
+
+        <button id="bookButton">Book</button>
+    </main>
+
+    <script>
+        // ... your existing JavaScript ...
+
+        // Get references to the elements
+        const durationSlider = document.getElementById('duration');
+        const durationValue = document.getElementById('duration-value');
+        const bookButton = document.getElementById('bookButton');
+
+        // Update the duration value display
+        durationSlider.addEventListener('input', () => {
+            durationValue.textContent = durationSlider.value;
+        });
+
+        // Handle the "Book" button click
+        bookButton.addEventListener('click', () => {
+            // Get the values from the form
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            const duration = durationSlider.value;
+            const file = document.getElementById('file').files[0];
+
+            // ... (Your logic to process the booking data) ...
+        });
+         
+    </script>
+    <script>
+        const watchButton = document.querySelector('button:nth-child(1)');
+        const bookTimeButton = document.querySelector('button:nth-child(2)');
+
+        watchButton.addEventListener('click', () => {
+            window.location.href = 'watch.html';
+        });
+
+        bookTimeButton.addEventListener('click', () => {
+            window.location.href = 'bookTime.html';
+        });
+    </script>
+</body>
+</html>

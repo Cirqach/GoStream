@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+
+        .button-container {
+            display: flex; /* Arrange buttons in a row */
+            gap: 10px;   /* Space between buttons */
+            justify-content: center; /* Center the buttons horizontally */
+            align-items: center; /* Center the buttons vertically */
+            text-align: center;
+        }
+
+        header {
+            background-color: #333; /* Dark background for header */
+            color: white;
+            padding: 10px 0; /* Add some padding */
+            text-align: center;
+            width: 100%; /* Make header full width */
+            position: fixed; /* Fix the header to the top */
+            top: 0; /* Position it at the top */
+            z-index: 10; /* Ensure it stays on top of other content */
+            display: flex;
+            align-items: center; /* Center the header content vertically */
+            justify-content: center; /* Center the header content horizontally */
+        }
+
+        main {
+            padding: 20px;
+            text-align: center;
+            margin-top: 60px; /* Add space for the fixed header */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="button-container">
+            <button>Watch</button>
+            <button>Book a time</button>
+        </div>
+    </header>
+
+    <main>
+        <video id="localVideo" autoplay></video> <video id="remoteVideo" autoplay></video>
+
+        <script>
+const localVideo = document.getElementById('localVideo');
+const remoteVideo = document.getElementById('remoteVideo');
+
+const peerConnection = new RTCPeerConnection();
+
+// Add event listeners for track events
+peerConnection.ontrack = (event) => {
+    remoteVideo.srcObject = event.streams[0];
+};
+
+// ... (Signaling server logic to connect to the broadcaster) ...
+
+// ... (Code to send and receive offers/answers) ...
+
+// ... (Code to handle ICE candidates) ...
+
+        </script>
+
+    </main>
+    
+    <script>
+        const watchButton = document.querySelector('button:nth-child(1)');
+        const bookTimeButton = document.querySelector('button:nth-child(2)');
+
+        watchButton.addEventListener('click', () => {
+            window.location.href = 'watch.html';
+        });
+
+        bookTimeButton.addEventListener('click', () => {
+            window.location.href = 'bookTime.html';
+        });
+    </script>
+</body>
+</html>
