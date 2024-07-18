@@ -1,12 +1,19 @@
 package server
 
 import (
+	"flag"
 	"html/template"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 )
+
+var addr = flag.String("addr", "localhost:8080", "url:port for web service")
+
+var upgrader  = websocket.Upgrader{}
+
 func StartServer() {
 	r := mux.NewRouter()
 
