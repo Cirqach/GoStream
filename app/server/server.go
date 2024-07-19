@@ -16,10 +16,15 @@ var upgrader  = websocket.Upgrader{}
 
 func StartServer() {
 	flag.Parse()
+	hub := NewHub()
 	log.SetFlags(0)
 	r := mux.NewRouter()
 	r.HandleFunc("/",rootHandler)
 	r.HandleFunc("/watch", watchHandler)
+	r.HandleFunc(
+		"/ws",
+		websocket.(hub.HandleConn),
+	))
 	r.HandleFunc("/bookatime", bookatimeHandler)
 	log.Printf("Listen on %s", *addr)
 	log.Fatal(http.ListenAndServe(*addr, r))
@@ -40,15 +45,6 @@ func watchHandler(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Content-Type", "text/html")
 	tmpl := template.Must(template.ParseFiles("./static/watch.html"))
 	tmpl.Execute(w, nil)
-	c, err : = upgrader.Upgrade(w,r,nil); err != nil {
-		log.Print("upgrade:", err)
-		return
-	}
-	defer c.Close()}
-	log.Println("Websocket connection established")
-	for{
-		
-	}
 }
 
 func bookatimeHandler(w http.ResponseWriter, r *http.Request){
