@@ -1,27 +1,24 @@
-package hub
+package server
 
 import (
 	"log"
 
-	"github.com/gorilla/websocket"
-
-	"github.com/Cirqach/GoStream/server/client"
 )
 
 type Hub struct {
-	clients map[*client.Client]bool
+	clients map[*Client]bool
 
-	register chan *client.Client
+	register chan *Client
 
-	unregister chan *client.Client
+	unregister chan *Client
 }
 
 func NewHub() *Hub {
 	log.Println("Creating new hub")
 	return &Hub{
-		clients: make(map[*client.Client]bool),
-		register: make(chan *client.Client),
-		unregister: make(chan *client.Client),
+		clients: make(map[*Client]bool),
+		register: make(chan *Client),
+		unregister: make(chan *Client),
 	}
 }
 
