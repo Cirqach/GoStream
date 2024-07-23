@@ -1,10 +1,11 @@
-  const watchButton = document.getElementById('watchButton' );
+const host = "http://localhost:8080/";
+const watchButton = document.getElementById('watchButton' );
         const bookTimeButton = document.getElementById('bookTimeButton');
 
         watchButton.addEventListener('click', () => {
-            window.location.href = 'watch.html';
+            window.location.href = host + 'watch';
         });
 
         bookTimeButton.addEventListener('click', () => {
-            window.location.href = 'bookatime.html';
+            window.location.href = host + 'book';
         });

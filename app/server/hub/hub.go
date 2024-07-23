@@ -1,8 +1,7 @@
-package server
+package client
 
 import (
-	"log"
-
+	"fmt"
 )
 
 type Hub struct {
@@ -14,7 +13,7 @@ type Hub struct {
 }
 
 func NewHub() *Hub {
-	log.Println("Creating new hub")
+	fmt.Println("New hub created")
 	return &Hub{
 		clients: make(map[*Client]bool),
 		register: make(chan *Client),
@@ -23,15 +22,18 @@ func NewHub() *Hub {
 }
 
 func (h *Hub) Run() {
-	log.Println("Starting hub")
+	fmt.Println("Hub running")
 	for{
 		select{
 		case client := <-h.register:
+			fmt.Println("Client registered")
 			h.clients[client] = true
 		case client := <-h.unregister:
+			fmt.Println("Client unregistered")
 			if _, ok := h.clients[client]; ok{
-				delete(h.clients,client)
+				fmt.Println("Client exists")
 				close(client.send)
+				delete(h.clients,client)
 			}
 		}
 		

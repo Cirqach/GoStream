@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{.host}}/static/style.css">
 </head>
 <body>
     <header>
@@ -18,11 +18,11 @@
         <h1>Hi!</h1> <p>Welcome to GoBroadcast project.</p>
         <p>Start with</p>
     <div class="button-container" style="align-items: center; text-align: center;">
-        <button id="watchButton" href="watch.html">Watch</button>
-        <button id="bookTimeButton" href="bookatime.html">Book a time</button>
+        <button id="watchButton" href="{{.host}}/watch">Watch</button>
+        <button id="bookTimeButton" href="{{.host}}/bookatime">Book a time</button>
     </div>
     </main>
-        <script src="script.js"></script>
+        <script src="{{.host}}/static/script.js"></script>
 
 </body>
 </html>
