@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="{{.host}}/web/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="button-container">
+            <button id="watchButton">Watch</button>
+            <button id="bookTimeButton">Book a time</button>
+        </div>
+    </header>
+
+    <main>
+        <h1>Hi!</h1> <p>Welcome to GoBroadcast project.</p>
+        <p>Start with</p>
+    <div class="button-container" style="align-items: center; text-align: center;">
+        <button id="watchButton" href="{{.host}}/watch">Watch</button>
+        <button id="bookTimeButton" href="{{.host}}/bookatime">Book a time</button>
+    </div>
+    </main>
+        <script src="{{.host}}/web/static/js/script.js"></script>
+
+</body>
+</html>

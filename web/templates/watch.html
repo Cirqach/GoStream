@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch</title>
+   
+    <link rel="stylesheet" href="{{.host}}/web/static/css/style.css">
+
+</head>
+<body>
+    <header>
+        <div class="button-container">
+             <button id="watchButton">Watch</button>
+            <button id="bookTimeButton">Book a time</button>
+        </div>
+    </header>
+
+    <main>
+        <br/>
+<textarea id="localSessionDescription" readonly="true"></textarea>
+<br/>
+
+<button onclick="window.copySessionDescription()">Copy browser Session Description to clipboard</button>
+
+<br/>
+<br/>
+<br/>
+
+Remote Session Description
+<br/>
+<textarea id="remoteSessionDescription"></textarea>
+<br/>
+<button onclick="window.startSession()">Start Session</button>
+<br/>
+<br/>
+
+Video
+<br/>
+<div id="remoteVideos"></div> <br />
+
+Logs
+<br/>
+<div id="div"></div>
+
+    </main>
+    
+   
+        <script src="{{.host}}/web/static/js/watch/websocket.js"></script>
+        <script src="{{.host}}/web/static/js/script.js"></script>
+
+</body>
+</html>
