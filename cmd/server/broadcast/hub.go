@@ -1,6 +1,10 @@
 package broadcast
 
-import "github.com/gorilla/websocket"
+import (
+	"log"
+
+	"github.com/gorilla/websocket"
+)
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize: 1024,
@@ -10,14 +14,15 @@ var upgrader = websocket.Upgrader{
 
 type Hub struct {
 	clients map[*Client]bool
-	stream chan []byte
+	Stream chan []byte
 	register chan *Client
 	unregister chan *Client
 }
 
 func NewHub() *Hub {
+	log.Println("Creating new hub")
 	return &Hub{
-		stream: make(chan []byte),
+		Stream: make(chan []byte),
 		register: make(chan *Client),
 		unregister: make(chan *Client),
 		clients: make(map[*Client]bool),
@@ -25,25 +30,25 @@ func NewHub() *Hub {
 }
 
 func (h *Hub) Run(){
+	log.Println("Starting hub")
 	for {
 		select{
 			case client := <-h.register:
+				log.Println("Registering client")
 				h.clients[client] = true
 			case client := <-h.unregister:
+				log.Println("Unregistering client")
 					delete(h.clients, client)
-			case message := <-h.stream:
-				h.broadcast(message)
+			case message := <-h.Stream:
+				log.Println("Broadcasting message")
+				h.Broadcast(message)
 		}
 	}
 }
 
-func (h *Hub) broadcast(m []byte){
+func (h *Hub) Broadcast(message []byte){
 	for client := range h.clients{
-		select{
-			case client.send <- m:
-			default:
-				close(client.send)
-				delete(h.clients, client)
-		}
+		client.conn.WriteMessage(websocket.TextMessage, message)
 	}
 }
+

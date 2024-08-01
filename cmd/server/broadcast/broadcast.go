@@ -11,18 +11,20 @@ type Broadcast struct{
 	Hub *Hub
 }
 
-func (b *Broadcast) handleWebsocket(w http.ResponseWriter, r *http.Request){
+func (b *Broadcast) HandleWebsocket(w http.ResponseWriter, r *http.Request){
+	log.Println("Handling websocket connection")
 	conn, err := upgrader.Upgrade(w, r, nil)
+	log.Println("Connection established")
 	if err != nil{
 		log.Println(err)
 		return
 	}
 	client := &Client{hub: b.Hub, conn: conn}
 	client.hub.register <- client
-	go client.writePump()
 }
 
 func NewBroadcast() *Broadcast{
+	log.Println("Creating new broadcast struct")
 	return &Broadcast{
 		Hub: NewHub(),
 	}

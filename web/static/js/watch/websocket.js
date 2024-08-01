@@ -1,11 +1,15 @@
 const host = "localhost"
 
+const video = document.getElementById('myVideo');
+const mediaSource = new MediaSource();
+video.src = URL.createObjectURL(mediaSource);
+
+let sourceBuffer;
+
 let socket = new WebSocket("http://localhost:8080/ws");
 
 socket.onopen = function(e) {
         alert("[open] Соединение установлено");
-        alert("Отправляем данные на сервер");
-        socket.send("Меня зовут Джон");
       };
       
       socket.onmessage = function(event) {
