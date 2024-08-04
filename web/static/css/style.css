@@ -79,3 +79,12 @@ textarea {
     width: 500px;
     min-height: 75px;
 }
+
+video {
+  width: 100%;
+  height: calc(100vh - 60px); /* Adjust the height based on your header height */
+}
+.video-container {
+  width: 100%;
+  position: relative; /* Necessary for absolute positioning of the video */
+}

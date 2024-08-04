@@ -14,11 +14,11 @@ type Broadcast struct{
 func (b *Broadcast) HandleWebsocket(w http.ResponseWriter, r *http.Request){
 	log.Println("Handling websocket connection")
 	conn, err := upgrader.Upgrade(w, r, nil)
-	log.Println("Connection established")
 	if err != nil{
 		log.Println(err)
 		return
 	}
+	log.Println("Connection established")
 	client := &Client{hub: b.Hub, conn: conn}
 	client.hub.register <- client
 }
