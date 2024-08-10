@@ -5,16 +5,14 @@ import (
 	"net/http"
 )
 
-
-
-type Broadcast struct{
+type BroadcastEngine struct {
 	Hub *Hub
 }
 
-func (b *Broadcast) HandleWebsocket(w http.ResponseWriter, r *http.Request){
+func (b *BroadcastEngine) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 	log.Println("Handling websocket connection")
 	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil{
+	if err != nil {
 		log.Println(err)
 		return
 	}
@@ -23,10 +21,9 @@ func (b *Broadcast) HandleWebsocket(w http.ResponseWriter, r *http.Request){
 	client.hub.register <- client
 }
 
-func NewBroadcast() *Broadcast{
+func NewBroadcastEngine() *BroadcastEngine {
 	log.Println("Creating new broadcast struct")
-	return &Broadcast{
+	return &BroadcastEngine{
 		Hub: NewHub(),
 	}
 }
-

@@ -13,9 +13,7 @@ func NewFFmpeg() *FFmpeg{
 	return &FFmpeg{}
 }
 
-func (f *FFmpeg) Process(inputFilePath, outputDirName string) error{
-	log.Println("Processing video")
-	mkdir(outputDirName)
+func (f *FFmpeg) Parse(inputFilePath, outputDirName string) error{
 	cmd := exec.Command("ffmpeg",
 "-i", inputFilePath,
 "-c:v", "libx264",
@@ -35,14 +33,4 @@ fmt.Println("FFmpeg output: " + string(output))
 return nil
 }
 
-func mkdir(outputDirName string){
-	log.Println("Creating directory in path ./" + outputDirName)
-cmd := exec.Command("mkdir",
-"-p",
-"./video/processed/" + outputDirName)
-//	cmd := exec.Command("mkdir", "/video/processed/" + outputDirName)
-	err := cmd.Run()
-	if err != nil{
-		log.Fatal(err)
-	}
-}
+

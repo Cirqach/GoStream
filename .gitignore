@@ -1,1 +1,3 @@
-/video/
+**/processed/*
+**/unprocessed/*
+-**/**/anchor.md
