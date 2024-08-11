@@ -1,13 +1,12 @@
 package server
 
 import (
-	"fmt"
 	"log"
-	"time"
 
 	// "net/http"
 	//
 	// "github.com/Cirqach/GoStream/cmd/server/api/handler"
+	"github.com/Cirqach/GoStream/cmd/logger"
 	"github.com/Cirqach/GoStream/cmd/server/broadcast"
 	videoprocessor "github.com/Cirqach/GoStream/cmd/server/broadcast/videoProcessor"
 	"github.com/Cirqach/GoStream/internal/database"
@@ -37,11 +36,9 @@ func NewServer(addr string) *server {
 func (s *server) StartServer() {
 
 	s.databaseController.MakeConnection()
-	data, err := s.databaseController.GetSoonerVideo()
-	if err != nil {
-		log.Printf("error due receiving data: %s", err)
+	if err := s.databaseController.ClearQueue(); err != nil {
+		logger.LogError("StartServer", err.Error())
 	}
-	fmt.Printf("recieved data: %s", data)
 
 	// go s.videoProcessor.Process("./video/unprocessed/1.mp4", "1")
 	// go s.videoProcessor.Process("./video/unprocessed/2.mp4", "2")

@@ -1,3 +1,8 @@
+ CREATE TABLE queue (
+	id		SERIAL PRIMARY KEY,
+	path		VARCHAR(255) NOT NULL,
+	broadcast_time	TIMESTAMP NOT NULL
+);
 DROP TABLE IF EXISTS queue;
  CREATE TABLE queue (
 	id		SERIAL PRIMARY KEY,
@@ -7,8 +12,11 @@ DROP TABLE IF EXISTS queue;
 INSERT INTO queue
 	(path, broadcast_time)
 VALUES
-	('./video/unprocessed/1.mp4','2024-08-07 11:30:00' ),
 	('./video/unprocessed/2.mp4','2024-08-07 12:10:00' ),
+	('./video/unprocessed/1.mp4','2024-10-07 11:30:00' ),
+	('./video/unprocessed/1.mp4','2024-12-07 11:30:00' ),
+	('./video/unprocessed/1.mp4','2024-08-07 11:30:00' ),
+	('./video/unprocessed/1.mp4','2024-08-07 11:30:00' ),
 	('1', '2024-08-10 08:20:00'),
 	('./video/unprocessed/3.mp4','2024-08-07 13:15:00' ),
 	('./video/unprocessed/4.mp4','2024-08-07 13:30:00' ),
