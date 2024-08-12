@@ -16,7 +16,7 @@ const (
 	port = "5432"
 )
 
-type video struct {
+type Video struct {
 	id   string
 	path string
 	time string
@@ -39,7 +39,7 @@ func (dbc *DatabaseController) MakeConnection() {
 	dbname := os.Getenv("DATABASE_NAME")
 	if user == "" && password == "" && dbname == "" {
 		logger.LogError("MakeConnection",
-			fmt.Sprintf("user = \"%s\", password = \"%s\", dbname = \"%s\""))
+			fmt.Sprintf("user = \"%s\", password = \"%s\", dbname = \"%s\"", user, password, dbname))
 	}
 	db, err := sql.Open("postgres",
 		fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", user, password, host, dbname))
@@ -54,7 +54,7 @@ func (dbc *DatabaseController) MakeConnection() {
 
 // AddVideoToQueue method    add new video to Queue table
 func (dbc *DatabaseController) AddVideoToQueue(path, data string) error {
-	_, err := dbc.db.Exec(fmt.Sprintf("INSERT INTO queue VALUES (%s, %s);"), path, data)
+	_, err := dbc.db.Exec(fmt.Sprintf("INSERT INTO queue VALUES ('%s', '%s');", path, data))
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (dbc *DatabaseController) AddVideoToQueue(path, data string) error {
 
 // CreateUser method     create new row in User table in database
 func (dbc *DatabaseController) CreateUser(name, second_name, username, email, login, password string) error {
-	_, err := dbc.db.Exec(fmt.Sprintf("INSERT INTO users VALUES (%s, %s, %s, %s, %s, %s);",
+	_, err := dbc.db.Exec(fmt.Sprintf("INSERT INTO users (name, second_name, username, email, login, password) VALUES ('%s', '%s', '%s', '%s', '%s', '%s');",
 		name, second_name, username, email, login, password))
 	if err != nil {
 		return err
@@ -73,15 +73,15 @@ func (dbc *DatabaseController) CreateUser(name, second_name, username, email, lo
 
 // NOTE: mayby I should return sooner video in comparison with time.Now()
 // GetSoonerVideo method    return sooner video from database
-func (dbc *DatabaseController) GetSoonerVideo() (video, error) {
+func (dbc *DatabaseController) GetSoonerVideo() (Video, error) {
 	videoRow, err := dbc.db.Query("SELECT * FROM queue ORDER BY broadcast_time ASC LIMIT 1;")
 	if err != nil {
 		logger.LogError("GetSoonerVideo",
 			fmt.Sprintf("Error in getting sooner video: %s", videoRow))
-		return video{}, err
+		return Video{}, err
 	}
 	defer videoRow.Close()
-	video := video{}
+	video := Video{}
 
 	for videoRow.Next() {
 		if err = videoRow.Scan(&video.id, &video.path, &video.time); err != nil {
