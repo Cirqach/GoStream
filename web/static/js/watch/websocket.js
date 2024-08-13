@@ -1,5 +1,5 @@
-const host = "localhost"
-let socket = new WebSocket("http://localhost:8080/ws");
+const host = "http://localhost:8080"
+let socket = new WebSocket(host + "/ws");
 
 socket.onopen = function(e) {
   console.log("connected");

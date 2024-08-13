@@ -17,9 +17,9 @@ const (
 )
 
 type Video struct {
-	id   string
-	path string
-	time string
+	Id   string
+	Path string
+	Time string
 }
 
 // DatabaseController struct    allow access to dabase
@@ -84,7 +84,7 @@ func (dbc *DatabaseController) GetSoonerVideo() (Video, error) {
 	video := Video{}
 
 	for videoRow.Next() {
-		if err = videoRow.Scan(&video.id, &video.path, &video.time); err != nil {
+		if err = videoRow.Scan(&video.Id, &video.Path, &video.Time); err != nil {
 			logger.LogError("GetSoonerVideo", fmt.Sprintf("Error due scanning: %s", err))
 		}
 	}
