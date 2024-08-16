@@ -17,7 +17,7 @@ func NewQueueController() *QueueController {
 
 func (q *QueueController) StartControlling(c chan database.Video) {
 	if err := q.dbController.ClearQueue(); err != nil {
-		logger.LogError("deleteOldVideos", err.Error())
+		logger.LogError(logger.GetFuncName(0), err.Error())
 	}
 	go q.controlSchedule(c)
 }
@@ -26,7 +26,7 @@ func (q *QueueController) controlSchedule(c chan database.Video) {
 	for {
 		video, err := q.dbController.GetSoonerVideo()
 		if err != nil {
-			logger.LogError("controlSchedule", err.Error())
+			logger.LogError(logger.GetFuncName(0), err.Error())
 		}
 		c <- video
 	}

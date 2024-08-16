@@ -38,23 +38,23 @@ func (dbc *DatabaseController) MakeConnection() {
 	password := os.Getenv("DATABASE_PASSWORD")
 	dbname := os.Getenv("DATABASE_NAME")
 	if user == "" && password == "" && dbname == "" {
-		logger.LogError("MakeConnection",
+		logger.LogError(logger.GetFuncName(0),
 			fmt.Sprintf("user = \"%s\", password = \"%s\", dbname = \"%s\"", user, password, dbname))
 	}
 	db, err := sql.Open("postgres",
 		fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", user, password, host, dbname))
 	if err != nil {
-		logger.LogError("MakeConnection",
+		logger.LogError(logger.GetFuncName(0),
 			fmt.Sprintf("Error connecting to database: %s", err))
 	}
-	logger.LogMessage("MakeConnection", "Database connected by path: "+
+	logger.LogMessage(logger.GetFuncName(0), "Database connected by path: "+
 		fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", user, password, host, dbname))
 	dbc.db = db
 }
 
 // AddVideoToQueue method    add new video to Queue table
-func (dbc *DatabaseController) AddVideoToQueue(path, data string) error {
-	_, err := dbc.db.Exec(fmt.Sprintf("INSERT INTO queue VALUES ('%s', '%s');", path, data))
+func (dbc *DatabaseController) AddVideoToQueue(fileName, date string) error {
+	_, err := dbc.db.Exec(fmt.Sprintf("INSERT INTO queue (path, broadcast_time) VALUES ('%s', '%s');", fileName, date))
 	if err != nil {
 		return err
 	}
@@ -63,8 +63,10 @@ func (dbc *DatabaseController) AddVideoToQueue(path, data string) error {
 
 // CreateUser method     create new row in User table in database
 func (dbc *DatabaseController) CreateUser(name, second_name, username, email, login, password string) error {
-	_, err := dbc.db.Exec(fmt.Sprintf("INSERT INTO users (name, second_name, username, email, login, password) VALUES ('%s', '%s', '%s', '%s', '%s', '%s');",
-		name, second_name, username, email, login, password))
+	_, err := dbc.db.Exec(
+		fmt.Sprintf("INSERT INTO users (name, second_name, username, email, login, password)"+
+			" VALUES ('%s', '%s', '%s', '%s', '%s', '%s');",
+			name, second_name, username, email, login, password))
 	if err != nil {
 		return err
 	}
@@ -76,7 +78,7 @@ func (dbc *DatabaseController) CreateUser(name, second_name, username, email, lo
 func (dbc *DatabaseController) GetSoonerVideo() (Video, error) {
 	videoRow, err := dbc.db.Query("SELECT * FROM queue ORDER BY broadcast_time ASC LIMIT 1;")
 	if err != nil {
-		logger.LogError("GetSoonerVideo",
+		logger.LogError(logger.GetFuncName(0),
 			fmt.Sprintf("Error in getting sooner video: %s", videoRow))
 		return Video{}, err
 	}
@@ -85,7 +87,7 @@ func (dbc *DatabaseController) GetSoonerVideo() (Video, error) {
 
 	for videoRow.Next() {
 		if err = videoRow.Scan(&video.Id, &video.Path, &video.Time); err != nil {
-			logger.LogError("GetSoonerVideo", fmt.Sprintf("Error due scanning: %s", err))
+			logger.LogError(logger.GetFuncName(0), fmt.Sprintf("Error due scanning: %s", err))
 		}
 	}
 	return video, nil
