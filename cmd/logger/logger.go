@@ -6,11 +6,11 @@ import (
 )
 
 func LogError(funcName, message string) {
-	log.Println("ERROR: in func " + " : " + message)
+	log.Println("ERROR: in func " + funcName + " : " + message)
 }
 
 func LogMessage(funcName, message string) {
-	log.Println("MESSAGE " + ": " + message)
+	log.Println("MESSAGE: " + funcName + " : " + message)
 }
 
 func GetFuncName(skip int) string {
@@ -23,4 +23,8 @@ func GetFuncName(skip int) string {
 		return "unknown"
 	}
 	return f.Name()
+}
+
+func Fatal(funcName, message string) {
+	log.Fatal("FATAL: in func " + funcName + " : " + message)
 }

@@ -11,20 +11,9 @@ import (
 	"github.com/Cirqach/GoStream/cmd/videoProcessor/ffmpeg"
 )
 
-type VideoProcessor struct {
-	FFmpegEngine *ffmpeg.FFmpeg
-}
-
-func NewVideoProcessor() *VideoProcessor {
-	log.Println("Creating new video processor")
-	return &VideoProcessor{
-		FFmpegEngine: ffmpeg.NewFFmpeg(),
-	}
-}
-
-func (vp *VideoProcessor) Process(inputFilePath, outputDirName string) {
+func Process(inputFilePath, outputDirName string) {
 	mkdir(outputDirName)
-	vp.FFmpegEngine.Parse(inputFilePath, outputDirName)
+	ffmpeg.Parse(inputFilePath, outputDirName)
 
 }
 
@@ -50,7 +39,7 @@ func delete(dirName string) {
 	}
 }
 
-func (v *VideoProcessor) SaveVideo(file multipart.File, handler *multipart.FileHeader) error {
+func SaveVideo(file multipart.File, handler *multipart.FileHeader) error {
 	dst, err := os.Create("./video/unprocessed/" + handler.Filename)
 	if err != nil {
 		logger.LogError(logger.GetFuncName(0), err.Error())

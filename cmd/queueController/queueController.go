@@ -6,12 +6,12 @@ import (
 )
 
 type QueueController struct {
-	dbController database.DatabaseController
+	dbController *database.DatabaseController
 }
 
-func NewQueueController() *QueueController {
+func NewQueueController(dbController *database.DatabaseController) *QueueController {
 	return &QueueController{
-		dbController: *database.NewDatabaseController(),
+		dbController: dbController,
 	}
 }
 

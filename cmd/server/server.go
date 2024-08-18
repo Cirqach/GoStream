@@ -6,8 +6,6 @@ import (
 	"github.com/Cirqach/GoStream/cmd/api/handler"
 	"github.com/Cirqach/GoStream/cmd/broadcast"
 	"github.com/Cirqach/GoStream/cmd/logger"
-	"github.com/Cirqach/GoStream/cmd/middleware"
-	videoprocessor "github.com/Cirqach/GoStream/cmd/videoProcessor"
 	"github.com/Cirqach/GoStream/internal/database"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -20,29 +18,21 @@ var (
 
 type Server struct {
 	router             *mux.Router
-	videoProcessor     *videoprocessor.VideoProcessor
 	broadcastEngine    *broadcast.BroadcastEngine
 	databaseController *database.DatabaseController
-	protocol           string
-	ip                 string
-	port               string
 }
 
-func NewServer(protocol, ip, port string) *Server {
+func NewServer() *Server {
 	logger.LogMessage("NewServer",
 		"Creating new server")
 	return &Server{
 		router:             mux.NewRouter(),
-		videoProcessor:     videoprocessor.NewVideoProcessor(),
 		broadcastEngine:    broadcast.NewBroadcastEngine(),
 		databaseController: database.NewDatabaseController(),
-		protocol:           protocol,
-		ip:                 ip,
-		port:               port,
 	}
 }
 
-func (s *Server) StartServer() {
+func (s *Server) StartServer(protocol, ip, port string) {
 
 	logger.LogMessage(logger.GetFuncName(0), "Starting server")
 
@@ -63,24 +53,18 @@ func (s *Server) StartServer() {
 		Handler(http.StripPrefix("/web/static/css/",
 			http.FileServer(http.Dir("./web/static/css/"))))
 
-	logger.LogMessage(logger.GetFuncName(0), "Serving routes: "+s.protocol+s.ip+s.port)
-	host := s.protocol + s.ip + s.port
+	logger.LogMessage(logger.GetFuncName(0), "Serving routes: "+protocol+ip+port)
+	host := protocol + ip + port
 
-	s.router.HandleFunc("/book",
-		middleware.AuthMiddleware(
-			handler.BookatimeHandler(host,
-				s.videoProcessor,
-				s.databaseController)))
-	s.router.HandleFunc("/", handler.RootHandler(host))
-	s.router.HandleFunc("/watch", handler.WatchHandler(host))
-	s.router.HandleFunc("/cookiet", handler.GetCookie)
-	s.router.HandleFunc("/auth", handler.AuthHandler(host))
+	s.router.HandleFunc("/book", handler.BookatimeHandler(host, s.databaseController)).Methods("GET", "POST")
+	s.router.HandleFunc("/", handler.RootHandler(host)).Methods("GET")
+	s.router.HandleFunc("/watch", handler.WatchHandler(host)).Methods("GET")
+	s.router.HandleFunc("/login", handler.LoginPageHandler(host)).Methods("GET")
+	s.router.HandleFunc("/auth", handler.LoginHandler(host, s.databaseController)).Methods("POST")
 
-	logger.LogMessage(logger.GetFuncName(0), "Listen on "+s.port)
-	err := http.ListenAndServe(s.port, s.router)
+	logger.LogMessage(logger.GetFuncName(0), "Listen on "+port)
+	err := http.ListenAndServe(port, s.router)
 	if err != nil {
 		logger.LogError(logger.GetFuncName(0), err.Error())
 	}
 }
-
-func hdnler(w http.ResponseWriter, r *http.Request) {}

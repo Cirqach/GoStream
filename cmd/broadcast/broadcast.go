@@ -2,22 +2,19 @@ package broadcast
 
 import (
 	"github.com/Cirqach/GoStream/cmd/logger"
-	queuecontroller "github.com/Cirqach/GoStream/cmd/queueController"
 	"github.com/Cirqach/GoStream/internal/database"
 )
 
 // BroadcastEngine struct    allow access to control websockets connection and vidoe lifetime update
 type BroadcastEngine struct {
-	Hub             *Hub
-	queueController *queuecontroller.QueueController
+	Hub *Hub
 }
 
 // NewBroadcastEngine function    create new BroadcastEngine object
 func NewBroadcastEngine() *BroadcastEngine {
 	logger.LogMessage(logger.GetFuncName(0), "Creating new broadcast struct")
 	return &BroadcastEngine{
-		Hub:             NewHub(),
-		queueController: queuecontroller.NewQueueController(),
+		Hub: NewHub(),
 	}
 }
 

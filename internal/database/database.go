@@ -104,3 +104,13 @@ func (dbc *DatabaseController) ClearQueue() error {
 	return nil
 
 }
+
+func (dbc *DatabaseController) VerifyUser(username, password string) bool {
+	logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("trying verify user: username: %s, password: %s", username, password))
+	_, err := dbc.db.Exec(fmt.Sprintf("SELECT 1 FROM users WHERE username = %s;", username))
+	if err != nil {
+		logger.LogError(logger.GetFuncName(0), err.Error())
+		return false
+	}
+	return true
+}

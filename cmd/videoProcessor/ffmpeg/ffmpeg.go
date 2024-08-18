@@ -6,14 +6,7 @@ import (
 	"os/exec"
 )
 
-type FFmpeg struct {
-}
-
-func NewFFmpeg() *FFmpeg {
-	return &FFmpeg{}
-}
-
-func (f *FFmpeg) Parse(inputFilePath, outputDirName string) error {
+func Parse(inputFilePath, outputDirName string) error {
 	cmd := exec.Command("ffmpeg",
 		"-i", inputFilePath,
 		"-c:v", "libx264",

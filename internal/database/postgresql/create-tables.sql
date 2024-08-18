@@ -25,17 +25,13 @@ VALUES
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
 	id		SERIAL PRIMARY KEY,
-	name		VARCHAR(255),
-	second_name	VARCHAR(255),
 	username	VARCHAR(255) NOT NULL,
-	email		VARCHAR(255) NOT NULL,
-	login		VARCHAR(255) NOT NULL, 
 	password	VARCHAR(255) NOT NULL
 );
 
 INSERT INTO users
-	(name, second_name, username, email, login, password)
+	(username, password)
 VALUES
-	('admin', 'admin', 'god', 'unamed@duck.com', 'admin', '$2a$12$ZdsWrIAfaRjNhhOHMgX6GOiBqxnqnIgN.coGSjL3AQ2McRjg5SmLS'),
-	('slave', 'slave', 'abomination', 'unamed@duck.com', 'slave', '$2a$12$CsLeQ75XnprA5N53OarPpuH0MBYKonYJzkkci0jMv7eFbkYicJ4S6');
+	('admin','$2a$12$ZdsWrIAfaRjNhhOHMgX6GOiBqxnqnIgN.coGSjL3AQ2McRjg5SmLS'),
+	('user','$2a$12$CsLeQ75XnprA5N53OarPpuH0MBYKonYJzkkci0jMv7eFbkYicJ4S6');
 
