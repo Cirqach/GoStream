@@ -6,11 +6,12 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// TODO: add client token
+// Client struct    allow access to control websockets connection
 type Client struct {
 	Hub  *Hub
 	Conn *websocket.Conn
 	Send chan []byte
-	Id   string
 }
 
 const (

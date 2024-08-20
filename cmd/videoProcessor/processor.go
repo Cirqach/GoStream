@@ -11,12 +11,14 @@ import (
 	"github.com/Cirqach/GoStream/cmd/videoProcessor/ffmpeg"
 )
 
+// Process function    process given video
 func Process(inputFilePath, outputDirName string) {
 	mkdir(outputDirName)
 	ffmpeg.Parse(inputFilePath, outputDirName)
 
 }
 
+// mkdir function    create directory in path /video/processed/ with given name
 func mkdir(outputDirName string) {
 	log.Println("Creating directory in path /video/processed/" + outputDirName)
 	cmd := exec.Command("mkdir",
@@ -28,6 +30,7 @@ func mkdir(outputDirName string) {
 	}
 }
 
+// delete function    delete directory in path /video/processed/ with given name
 func delete(dirName string) {
 	log.Println("Deleting directory in path /video/processed/" + dirName)
 	cmd := exec.Command("rm",
@@ -39,6 +42,7 @@ func delete(dirName string) {
 	}
 }
 
+// SaveVideo function    save video in path /video/unprocessed/ with given name
 func SaveVideo(file multipart.File, handler *multipart.FileHeader) error {
 	dst, err := os.Create("./video/unprocessed/" + handler.Filename)
 	if err != nil {

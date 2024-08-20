@@ -6,6 +6,7 @@ import (
 	"os/exec"
 )
 
+// Parse function    parse video with ffmpeg
 func Parse(inputFilePath, outputDirName string) error {
 	cmd := exec.Command("ffmpeg",
 		"-i", inputFilePath,

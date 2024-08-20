@@ -16,9 +16,10 @@ var (
 	Host     = "http://localhost:8080"
 )
 
+// Server struct    struct allow to control all server
 type Server struct {
 	router             *mux.Router
-	broadcastEngine    *broadcast.BroadcastEngine
+	broadcastEngine    *broadcast.Engine
 	databaseController *database.DatabaseController
 }
 
@@ -27,7 +28,7 @@ func NewServer() *Server {
 		"Creating new server")
 	return &Server{
 		router:             mux.NewRouter(),
-		broadcastEngine:    broadcast.NewBroadcastEngine(),
+		broadcastEngine:    broadcast.NewEngine(),
 		databaseController: database.NewDatabaseController(),
 	}
 }
