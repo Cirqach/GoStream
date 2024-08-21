@@ -1,53 +1,48 @@
+// Get references to the elements
+const dateInput = document.getElementById('date');
+const timeInput = document.getElementById('time');
+const fileInput = document.getElementById('videofile');
+const bookButton = document.getElementById('bookButton');
 
+// Handle the "Book" button click
+bookButton.addEventListener('click', () => {
+  // Get the values from the form
+  const date = dateInput.value;
+  const time = timeInput.value;
+  const file = fileInput.files[0]; // Assuming only one file is allowed
 
+  // Validate the inputs (optional)
+  if (!date || !time || !file) {
+    alert('Please fill in all fields.');
+    return;
+  }
 
-        // Get references to the elements
-        const durationSlider = document.getElementById('duration');
-        const durationValue = document.getElementById('duration-value');
-        const bookButton = document.getElementById('bookButton');
+  // Create a FormData object to send the data
+  const formData = new FormData();
+  formData.append('date', date);
+  formData.append('time', time);
+  formData.append('videofile', file);
 
-        // Handle the "Book" button click
-
-  document.getElementById('bookButton').addEventListener('click', () => {
-        const date = document.getElementById('date').value;
-        const time = document.getElementById('time').value;
-        const file = document.getElementById('file').files[0];
-
-        const formData = new FormData();
-        formData.append('date', date);
-        formData.append('time', time);
-        formData.append('file', file);
-
-        bookButton.addEventListener('click', () => {
-            // Get the values from the form
-            const date = document.getElementById('date').value;
-            const time = document.getElementById('time').value;
-            const file = document.getElementById('file').files[0];
-
-            // ... (Your logic to process the booking data) ...
-        });
-        fetch('/book', {
-          method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-              //TODO: wtf i should write here if my token contains in the cookie
-    'Authorization': `Bearer `
-  },
-          body: formData
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();  
- // Or handle response as needed
-        })
-        .then(data => {
-          console.log('Booking successful:', data);
-          // Handle successful booking, e.g., display confirmation message
-        })
-        .catch(error => {
-          console.error('Error booking:', error);
-          // Handle booking error, e.g., display error message
-        });
-      });
+  // Send the data to the server using fetch
+  fetch('/book', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    body: formData
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('Booking successful:', data);
+    // Handle successful booking, e.g., display a confirmation message
+  })
+  .catch(error => {
+    console.error('Error booking:', error);
+    // Handle booking error, e.g., display an error message
+  });
+});

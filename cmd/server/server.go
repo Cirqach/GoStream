@@ -6,6 +6,7 @@ import (
 	"github.com/Cirqach/GoStream/cmd/api/handler"
 	"github.com/Cirqach/GoStream/cmd/broadcast"
 	"github.com/Cirqach/GoStream/cmd/logger"
+	queuecontroller "github.com/Cirqach/GoStream/cmd/queueController"
 	"github.com/Cirqach/GoStream/internal/database"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -21,6 +22,7 @@ type Server struct {
 	router             *mux.Router
 	broadcastEngine    *broadcast.Engine
 	databaseController *database.DatabaseController
+	queueController    *queuecontroller.QueueController
 }
 
 func NewServer() *Server {
@@ -39,10 +41,13 @@ func (s *Server) StartServer(protocol, ip, port string) {
 
 	s.databaseController.MakeConnection()
 
-	go s.broadcastEngine.Hub.Run()
+	s.queueController = queuecontroller.NewQueueController(s.databaseController)
+	go s.queueController.StartControlling(s.broadcastEngine.Chan, s.broadcastEngine)
+
+	go s.broadcastEngine.Hub.RunHub()
 
 	logger.LogMessage(logger.GetFuncName(0), "Handling websocket")
-	s.router.HandleFunc("/ws", handler.WebsocketHandler(&upgrader))
+	s.router.HandleFunc("/ws", handler.WebsocketHandler(&upgrader, s.broadcastEngine))
 	logger.LogMessage(logger.GetFuncName(0), "Serving static files")
 	s.router.PathPrefix("/video/processed/").
 		Handler(http.StripPrefix("/video/processed/",
@@ -68,4 +73,5 @@ func (s *Server) StartServer(protocol, ip, port string) {
 	if err != nil {
 		logger.LogError(logger.GetFuncName(0), err.Error())
 	}
+
 }

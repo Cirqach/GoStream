@@ -29,8 +29,8 @@ func NewHub() *Hub {
 	}
 }
 
-// Run method    run hub, for registering clients and sending messages to them
-func (h *Hub) Run() {
+// RunHub method    run hub, for registering clients and sending messages to them
+func (h *Hub) RunHub() {
 	logger.LogMessage(logger.GetFuncName(0), "Starting hub")
 	for {
 		select {

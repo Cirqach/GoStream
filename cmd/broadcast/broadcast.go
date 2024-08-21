@@ -7,7 +7,8 @@ import (
 
 // Engine struct    allow access to control websockets connection and vidoe lifetime update
 type Engine struct {
-	Hub *Hub
+	Chan chan database.Video
+	Hub  *Hub
 }
 
 // NewEngine function    create new BroadcastEngine object

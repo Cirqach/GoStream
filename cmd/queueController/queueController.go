@@ -20,8 +20,9 @@ func NewQueueController(dbController *database.DatabaseController) *QueueControl
 	}
 }
 
+// TODO: make it working, it not delete old queue and not change video on page
 // StartControlling method    start controling schedule and update "broadcast"
-func (q *QueueController) StartControlling(c chan database.Video, b broadcast.Engine) {
+func (q *QueueController) StartControlling(c chan database.Video, b *broadcast.Engine) {
 	if err := q.dbController.ClearQueue(); err != nil {
 		logger.LogError(logger.GetFuncName(0), err.Error())
 	}
