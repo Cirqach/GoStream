@@ -31,20 +31,21 @@ func mkdir(outputDirName string) {
 }
 
 // delete function    delete directory in path /video/processed/ with given name
-func delete(dirName string) {
-	log.Println("Deleting directory in path /video/processed/" + dirName)
-	cmd := exec.Command("rm",
-		"-rf",
-		"./video/processed/"+dirName)
-	err := cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-}
+// func delete(dirName string) {
+// 	log.Println("Deleting directory in path /video/processed/" + dirName)
+// 	cmd := exec.Command("rm",
+// 		"-rf",
+// 		"./video/processed/"+dirName)
+// 	err := cmd.Run()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// }
 
 // SaveVideo function    save video in path /video/unprocessed/ with given name
-func SaveVideo(file multipart.File, handler *multipart.FileHeader) error {
-	dst, err := os.Create("./video/unprocessed/" + handler.Filename)
+func SaveVideo(file multipart.File, filename string) error {
+	logger.LogMessage(logger.GetFuncName(0), "Saving video in path /video/unprocessed/"+filename)
+	dst, err := os.Create("./video/unprocessed/" + filename)
 	if err != nil {
 		logger.LogError(logger.GetFuncName(0), err.Error())
 		return err
@@ -54,5 +55,6 @@ func SaveVideo(file multipart.File, handler *multipart.FileHeader) error {
 		logger.LogError(logger.GetFuncName(0), err.Error())
 		return err
 	}
+	logger.LogMessage(logger.GetFuncName(0), "Video saved in path /video/unprocessed/"+filename)
 	return nil
 }

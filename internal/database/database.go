@@ -101,14 +101,20 @@ func (dbc *DatabaseController) GetSoonerVideo() (Video, error) {
 
 // ClearQueue method    delete rows from database which older than time.Now()
 func (dbc *DatabaseController) ClearQueue() error {
-	logger.LogMessage(logger.GetFuncName(0), "Clearing queue")
+	logger.LogMessage(logger.GetFuncName(0), "Clearing record older than "+time.Now().String())
 	t := fmt.Sprintf(strings.Split(time.Now().Local().String(), ".")[0])
-	_, err := dbc.db.Exec(
+	result, err := dbc.db.Exec(
 		fmt.Sprintf("DELETE FROM queue WHERE broadcast_time < '%s'", t))
 	if err != nil {
 		logger.LogError(logger.GetFuncName(0), err.Error())
 		return err
 	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		logger.LogError(logger.GetFuncName(0), err.Error())
+		return err
+	}
+	logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("deleted %d rows", rowsAffected))
 	return nil
 }
 

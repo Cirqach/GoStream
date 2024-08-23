@@ -11,33 +11,43 @@ import (
 // QueueController struct    struct allow to control the video queue
 type QueueController struct {
 	dbController *database.DatabaseController
+	c            chan database.Video
 }
 
 // NewQueueController function    create new queue controller
 func NewQueueController(dbController *database.DatabaseController) *QueueController {
 	return &QueueController{
 		dbController: dbController,
+		c:            make(chan database.Video),
 	}
 }
 
-// TODO: make it working, it not delete old queue and not change video on page
 // StartControlling method    start controling schedule and update "broadcast"
-func (q *QueueController) StartControlling(c chan database.Video, b *broadcast.Engine) {
+func (q *QueueController) StartControlling(b *broadcast.Engine) {
 	if err := q.dbController.ClearQueue(); err != nil {
-		logger.LogError(logger.GetFuncName(0), err.Error())
+		logger.LogError(logger.GetFuncName(0), "error clearing queue"+err.Error())
 	}
-	go q.controlSchedule(c)
-	go b.UpdateVideo(c)
+	go q.controlSchedule()
+	go b.UpdateVideo(q.c)
 }
 
+// TODO: fix infinite loop
 // controlSchedule method    controling video schedule
-func (q *QueueController) controlSchedule(c chan database.Video) {
+func (q *QueueController) controlSchedule() {
 	for {
 		// 1. Get the sooner video and its scheduled broadcast time
 		video, err := q.dbController.GetSoonerVideo()
 		if err != nil {
+
 			logger.LogError(logger.GetFuncName(0), err.Error())
+			time.Sleep(time.Second * 10)
 			continue // Move on to the next iteration in case of error
+		}
+
+		if video == (database.Video{}) {
+			logger.LogMessage(logger.GetFuncName(0), "No videos in queue")
+			time.Sleep(time.Second * 10)
+			continue
 		}
 
 		// 2. Calculate the duration until broadcast time
@@ -45,13 +55,14 @@ func (q *QueueController) controlSchedule(c chan database.Video) {
 		t, err := time.Parse(time.RFC3339, video.Time)
 		if err != nil {
 			logger.LogError(logger.GetFuncName(0), err.Error())
+			time.Sleep(time.Second * 10)
 			continue
 		}
 
 		// Handle cases for broadcast time already passed or in the future
 		if now.After(t) {
 			// Broadcast time has already passed, send the video immediately
-			c <- video
+			q.c <- video
 			continue
 		}
 		duration := t.Sub(now)
@@ -61,12 +72,12 @@ func (q *QueueController) controlSchedule(c chan database.Video) {
 
 		// 4. Select on the channel `c` and the timer for control flow
 		select {
-		case <-c:
+		case <-q.c:
 			// Another video might have been pushed to the queue, handle it
 			continue
 		case <-timer:
 			// Broadcast time reached, send the video for switching
-			c <- video
+			q.c <- video
 		}
 	}
 }

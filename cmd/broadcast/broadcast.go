@@ -22,6 +22,7 @@ func NewEngine() *Engine {
 // TODO: need to create time changing for videos
 // UpdateVideo method    livetime video update
 func (b *Engine) UpdateVideo(c chan database.Video) {
+	logger.LogMessage(logger.GetFuncName(0), "Start updating video")
 	video := <-c
 	logger.LogMessage(logger.GetFuncName(0), "Updating video: "+video.Path)
 	b.Hub.Stream <- []byte(`

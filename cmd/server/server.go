@@ -42,7 +42,7 @@ func (s *Server) StartServer(protocol, ip, port string) {
 	s.databaseController.MakeConnection()
 
 	s.queueController = queuecontroller.NewQueueController(s.databaseController)
-	go s.queueController.StartControlling(s.broadcastEngine.Chan, s.broadcastEngine)
+	go s.queueController.StartControlling(s.broadcastEngine)
 
 	go s.broadcastEngine.Hub.RunHub()
 

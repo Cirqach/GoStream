@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+
+	"github.com/Cirqach/GoStream/cmd/logger"
 )
 
 // Parse function    parse video with ffmpeg
 func Parse(inputFilePath, outputDirName string) error {
+	logger.LogMessage(logger.GetFuncName(0), "Parsing video with ffmpeg")
 	cmd := exec.Command("ffmpeg",
 		"-i", inputFilePath,
 		"-c:v", "libx264",
