@@ -47,7 +47,7 @@ func (s *Server) StartServer(protocol, ip, port string) {
 	go s.broadcastEngine.Hub.RunHub()
 
 	logger.LogMessage(logger.GetFuncName(0), "Handling websocket")
-	s.router.HandleFunc("/ws", handler.WebsocketHandler(&upgrader, s.broadcastEngine))
+	s.router.HandleFunc("/ws", handler.WebsocketHandler(s.broadcastEngine.Hub))
 	logger.LogMessage(logger.GetFuncName(0), "Serving static files")
 	s.router.PathPrefix("/video/processed/").
 		Handler(http.StripPrefix("/video/processed/",
@@ -62,11 +62,11 @@ func (s *Server) StartServer(protocol, ip, port string) {
 	logger.LogMessage(logger.GetFuncName(0), "Serving routes: "+protocol+ip+port)
 	host := protocol + ip + port
 
-	s.router.HandleFunc("/book", handler.BookatimeHandler(host, s.databaseController)).Methods("GET", "POST")
+	s.router.HandleFunc("/book", handler.BookatimeHandler(host)).Methods("GET", "POST")
 	s.router.HandleFunc("/", handler.RootHandler(host)).Methods("GET")
 	s.router.HandleFunc("/watch", handler.WatchHandler(host)).Methods("GET")
-	s.router.HandleFunc("/login", handler.LoginPageHandler(host)).Methods("GET")
-	s.router.HandleFunc("/auth", handler.LoginHandler(host, s.databaseController)).Methods("POST")
+	s.router.HandleFunc("/login", handler.LoginForm).Methods("GET")
+	s.router.HandleFunc("/auth", handler.Login(s.databaseController)).Methods("POST")
 
 	logger.LogMessage(logger.GetFuncName(0), "Listen on "+port)
 	err := http.ListenAndServe(port, s.router)

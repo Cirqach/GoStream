@@ -1,6 +1,12 @@
 package queuecontroller
 
 import (
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/Cirqach/GoStream/cmd/broadcast"
@@ -80,4 +86,44 @@ func (q *QueueController) controlSchedule() {
 			q.c <- video
 		}
 	}
+}
+
+func (q *QueueController) BookATime(bookTime, date, file string, r *http.Request) error {
+	parsedTime, err := time.Parse("HH:MM", bookTime)
+	if err != nil {
+		return errors.New("invalid time format")
+	}
+
+	parsedDate, err := time.Parse("YYYY-MM-DD", date)
+	if err != nil {
+		return errors.New("invalid date format")
+	}
+	// Create a unique filename for the uploaded file
+	filename := fmt.Sprintf("%s-%s-%s.txt", parsedDate.Format("YYYY-MM-DD"), parsedTime.Format("HH:MM"), file)
+
+	// Save the file to a specified directory
+	fileDir := "uploads/" // Replace with your desired directory
+	err = os.MkdirAll(fileDir, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	filePath := filepath.Join(fileDir, filename)
+
+	// Create a new file and write the file content to it
+	newFile, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer newFile.Close()
+
+	// Write the file content (assuming it's in the request body)
+	_, err = io.Copy(newFile, r.Body)
+	if err != nil {
+		return err
+	}
+
+	// Save the booking information to a database or other storage (not shown in this example)
+
+	return nil
 }

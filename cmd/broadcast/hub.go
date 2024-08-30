@@ -51,7 +51,7 @@ func (h *Hub) RunHub() {
 func (h *Hub) Broadcast(message []byte) {
 	logger.LogMessage(logger.GetFuncName(0), "Broadcasting message to clients: "+string(message))
 	for client := range h.clients {
-		client.Conn.WriteMessage(websocket.TextMessage, message)
+		client.Send <- message
 	}
 }
 
