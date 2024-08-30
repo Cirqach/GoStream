@@ -38,7 +38,7 @@ func NewDatabaseController() *DatabaseController {
 func (dbc *DatabaseController) MakeConnection() {
 	logger.LogMessage(logger.GetFuncName(0), "Connecting to database")
 	user := os.Getenv("DATABASE_USER")
-	password := os.Getenv("DATABASE_PASSWORD")
+	password := os.Getenv("DATABASE_USER_PASSWORD")
 	dbname := os.Getenv("DATABASE_NAME")
 	if user == "" && password == "" && dbname == "" {
 		logger.LogError(logger.GetFuncName(0),
