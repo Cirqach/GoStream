@@ -130,3 +130,7 @@ func (dbc *DatabaseController) VerifyUser(username, password string) bool {
 	logger.LogMessage(logger.GetFuncName(0), "user verified")
 	return true
 }
+
+func (dbc *DatabaseController) CheckTimeOverlap(time time.Time, duration string) err{
+	_, err := 
+}

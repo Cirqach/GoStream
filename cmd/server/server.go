@@ -43,7 +43,11 @@ func NewServer(protocol, ip, port string) *Server {
 func (s *Server) StartServer() {
 	s.r.Use(middleware.Logger)
 
-	err := http.ListenAndServe(strings.Split(s.ip, ":")[2], s.r)
+	s.startServices()
+	s.serveStaticFiles()
+	s.handleRoutes()
+
+	err := http.ListenAndServe(":"+strings.Split(s.ip, ":")[2], s.r)
 	if err != nil {
 		logger.Fatal(logger.GetFuncName(0), err.Error())
 	}
@@ -68,9 +72,8 @@ func (s *Server) handleRoutes() {
 
 	s.r.Route("/", func(r chi.Router) {
 		r.Use(mw.Auth())
-		r.Post("/book", handler.BookTimeFormHandler(s.ip))
+		r.Post("/book", handler.BookTimeHandler())
 	})
-	s.r.HandleFunc("/book", handler.BookTimeFormHandler(host)).Methods("GET", "POST")
 }
 
 func (s *Server) serveStaticFiles() {

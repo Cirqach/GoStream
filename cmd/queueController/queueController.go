@@ -1,12 +1,8 @@
 package queuecontroller
 
 import (
-	"errors"
 	"fmt"
-	"io"
 	"net/http"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/Cirqach/GoStream/cmd/broadcast"
@@ -88,42 +84,42 @@ func (q *QueueController) controlSchedule() {
 	}
 }
 
-func (q *QueueController) BookATime(bookTime, date, file string, r *http.Request) error {
-	parsedTime, err := time.Parse("HH:MM", bookTime)
+// TODO: add good logic for booking time
+func (q *QueueController) BookATfime(wantedTime, date, filename, videoDuration string) error {
+	// Parse the wanted time and date into a Go time object
+	wantedTimeObj, err := time.Parse("HH:mm:ss", wantedTime)
 	if err != nil {
-		return errors.New("invalid time format")
+		return fmt.Errorf("invalid time format: %v", err)
+	}
+	month, err := time.Parse("2006-01-02", date)
+	if err != nil {
+
+	}
+	day, err := time.Parse("2006-01-02", date)
+	if err != nil {
+
 	}
 
-	parsedDate, err := time.Parse("YYYY-MM-DD", date)
-	if err != nil {
-		return errors.New("invalid date format")
-	}
-	// Create a unique filename for the uploaded file
-	filename := fmt.Sprintf("%s-%s-%s.txt", parsedDate.Format("YYYY-MM-DD"), parsedTime.Format("HH:MM"), file)
+	wantedDateTime := time.Date(
+		time.Now().Year(),
+		month.Month(),
+		day.Day(),
+		wantedTimeObj.Hour(),
+		wantedTimeObj.Minute(),
+		wantedTimeObj.Second(),
+		0,
+		time.UTC)
 
-	// Save the file to a specified directory
-	fileDir := "uploads/" // Replace with your desired directory
-	err = os.MkdirAll(fileDir, os.ModePerm)
-	if err != nil {
+	// Check if the wanted time overlaps with any existing broadcast times
+	if err := q.dbController.CheckTimeOverlap(wantedDateTime, videoDuration); err != nil {
 		return err
 	}
 
-	filePath := filepath.Join(fileDir, filename)
-
-	// Create a new file and write the file content to it
-	newFile, err := os.Create(filePath)
+	// If the time is free, add the video to the queue
+	err = q.dbController.AddVideoToQueue(filename, wantedDateTime)
 	if err != nil {
+		logger.LogError(logger.GetFuncName(0), err.Error())
 		return err
 	}
-	defer newFile.Close()
-
-	// Write the file content (assuming it's in the request body)
-	_, err = io.Copy(newFile, r.Body)
-	if err != nil {
-		return err
-	}
-
-	// Save the booking information to a database or other storage (not shown in this example)
-
 	return nil
 }
