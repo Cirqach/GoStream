@@ -53,7 +53,7 @@ func WatchHandler(host string) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func BookatimeHandler(host string) func(w http.ResponseWriter, r *http.Request) {
+func BookTimeFormHandler(host string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":

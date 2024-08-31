@@ -2,13 +2,16 @@ package server
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/Cirqach/GoStream/cmd/api/handler"
 	"github.com/Cirqach/GoStream/cmd/broadcast"
 	"github.com/Cirqach/GoStream/cmd/logger"
+	mw "github.com/Cirqach/GoStream/cmd/middleware"
 	queuecontroller "github.com/Cirqach/GoStream/cmd/queueController"
 	"github.com/Cirqach/GoStream/internal/database"
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/websocket"
 )
 
@@ -19,59 +22,71 @@ var (
 
 // Server struct    struct allow to control all server
 type Server struct {
-	router             *mux.Router
-	broadcastEngine    *broadcast.Engine
-	databaseController *database.DatabaseController
-	queueController    *queuecontroller.QueueController
+	ip string                           // server protocol://ip:port addres
+	r  *chi.Mux                         // router
+	b  *broadcast.Engine                // broadcast engine
+	d  *database.DatabaseController     // database controller
+	q  *queuecontroller.QueueController // queue controller
 }
 
-func NewServer() *Server {
+func NewServer(protocol, ip, port string) *Server {
 	logger.LogMessage("NewServer",
 		"Creating new server")
 	return &Server{
-		router:             mux.NewRouter(),
-		broadcastEngine:    broadcast.NewEngine(),
-		databaseController: database.NewDatabaseController(),
+		ip: protocol + "://" + ip + ":" + port,
+		r:  chi.NewRouter(),
+		b:  broadcast.NewEngine(),
+		d:  database.NewDatabaseController(),
 	}
 }
 
-func (s *Server) StartServer(protocol, ip, port string) {
+func (s *Server) StartServer() {
+	s.r.Use(middleware.Logger)
 
-	logger.LogMessage(logger.GetFuncName(0), "Starting server")
-
-	s.databaseController.MakeConnection()
-
-	s.queueController = queuecontroller.NewQueueController(s.databaseController)
-	go s.queueController.StartControlling(s.broadcastEngine)
-
-	go s.broadcastEngine.Hub.RunHub()
-
-	logger.LogMessage(logger.GetFuncName(0), "Handling websocket")
-	s.router.HandleFunc("/ws", handler.WebsocketHandler(s.broadcastEngine.Hub))
-	logger.LogMessage(logger.GetFuncName(0), "Serving static files")
-	s.router.PathPrefix("/video/processed/").
-		Handler(http.StripPrefix("/video/processed/",
-			http.FileServer(http.Dir("./video/processed/"))))
-	s.router.PathPrefix("/web/static/js/").
-		Handler(http.StripPrefix("/web/static/js/",
-			http.FileServer(http.Dir("./web/static/js/"))))
-	s.router.PathPrefix("/web/static/css/").
-		Handler(http.StripPrefix("/web/static/css/",
-			http.FileServer(http.Dir("./web/static/css/"))))
-
-	logger.LogMessage(logger.GetFuncName(0), "Serving routes: "+protocol+ip+port)
-	host := protocol + ip + port
-
-	s.router.HandleFunc("/book", handler.BookatimeHandler(host)).Methods("GET", "POST")
-	s.router.HandleFunc("/", handler.RootHandler(host)).Methods("GET")
-	s.router.HandleFunc("/watch", handler.WatchHandler(host)).Methods("GET")
-	s.router.HandleFunc("/login", handler.LoginForm).Methods("GET")
-	s.router.HandleFunc("/auth", handler.Login(s.databaseController)).Methods("POST")
-
-	logger.LogMessage(logger.GetFuncName(0), "Listen on "+port)
-	err := http.ListenAndServe(port, s.router)
+	err := http.ListenAndServe(strings.Split(s.ip, ":")[2], s.r)
 	if err != nil {
-		logger.LogError(logger.GetFuncName(0), err.Error())
+		logger.Fatal(logger.GetFuncName(0), err.Error())
 	}
+
+}
+
+func (s *Server) startServices() {
+	s.d.MakeConnection()
+	s.q = queuecontroller.NewQueueController(s.d)
+	go s.q.StartControlling(s.b)
+	go s.b.Hub.RunHub()
+
+}
+
+func (s *Server) handleRoutes() {
+	s.r.Get("/ws", handler.WebsocketHandler(s.b.Hub))
+	s.r.Get("/", handler.RootHandler(s.ip))
+	s.r.Get("/watch", handler.WatchHandler(s.ip))
+	s.r.Get("/login", handler.LoginForm)
+	s.r.Post("/auth", handler.Login(s.d))
+	s.r.Get("/book", handler.BookTimeFormHandler(s.ip))
+
+	s.r.Route("/", func(r chi.Router) {
+		r.Use(mw.Auth())
+		r.Post("/book", handler.BookTimeFormHandler(s.ip))
+	})
+	s.r.HandleFunc("/book", handler.BookTimeFormHandler(host)).Methods("GET", "POST")
+}
+
+func (s *Server) serveStaticFiles() {
+
+	logger.LogMessage(logger.GetFuncName(0), "Serving static files")
+	s.r.Handle(
+		"/video/processed/",
+		http.StripPrefix("/video/processed/",
+			http.FileServer(http.Dir("./video/processed/"))))
+	s.r.Handle(
+		"/web/static/js/",
+		http.StripPrefix("/web/static/js/",
+			http.FileServer(http.Dir("./web/static/js/"))))
+	s.r.Handle(
+		"/web/static/css/",
+		http.StripPrefix("/web/static/css/",
+			http.FileServer(http.Dir("./web/static/css/"))))
 
 }
