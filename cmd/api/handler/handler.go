@@ -15,8 +15,10 @@ import (
 	"github.com/Cirqach/GoStream/cmd/broadcast"
 	"github.com/Cirqach/GoStream/cmd/logger"
 	queuecontroller "github.com/Cirqach/GoStream/cmd/queueController"
+	"github.com/Cirqach/GoStream/cmd/videoProcessor/ffmpeg"
 	"github.com/Cirqach/GoStream/internal/auth"
 	"github.com/Cirqach/GoStream/internal/database"
+	"github.com/google/uuid"
 
 	"github.com/gorilla/websocket"
 )
@@ -76,8 +78,10 @@ func BookTimeFormHandler(host string) func(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// BookTimeHandler function    handler for post request for booking time
 func BookTimeHandler(q *queuecontroller.QueueController) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// getting values from request form
 		time := r.FormValue("time")
 		date := r.FormValue("date")
 		if time == "" && date == "" {
@@ -86,24 +90,31 @@ func BookTimeHandler(q *queuecontroller.QueueController) func(w http.ResponseWri
 			logger.LogError(logger.GetFuncName(0), "time and date are empty")
 			return
 		}
-		// Access the uploaded file
+		logger.LogMessage(logger.GetFuncName(0), "extracted time: "+time+" and date: "+date)
+		// getting file from request
 		file, handler, err := r.FormFile("videofile") // Replace "file" with the input field name
 		if err != nil {
 			http.Error(w, "No file uploaded", http.StatusBadRequest)
-			logger.LogError(logger.GetFuncName(0), err.Error())
+			logger.LogError(logger.GetFuncName(0), "No file uploaded: "+err.Error())
 			return
 		}
+		logger.LogMessage(logger.GetFuncName(0), "File received: "+handler.Filename)
 		defer file.Close()
 
+		// Check if the file format is supported
 		var supportedFormats = []string{"mp4", "mkv", "avi", "mov", "wmv", "flv", "webm"}
 		extension := strings.Split(handler.Filename, ".")[1]
-
 		if !func(supportedFormats []string, extension string) bool {
+			logger.LogMessage(logger.GetFuncName(0), "Checking file format")
+			// go in the loop through supported formats
 			for _, format := range supportedFormats {
+				// if format is supported return true
 				if format == extension {
+					logger.LogMessage(logger.GetFuncName(0), "File format supported")
 					return true
 				}
 			}
+			// format is not supported
 			return false
 		}(supportedFormats, extension) {
 			logger.LogError(logger.GetFuncName(0), "Unsupported file format: "+handler.Filename)
@@ -111,26 +122,44 @@ func BookTimeHandler(q *queuecontroller.QueueController) func(w http.ResponseWri
 			return
 		}
 
-		err = saveFile(file, handler)
+		// creating unique name for video file
+		filename := uuid.New().String()
+		// saving video file to /video/unprocessed directory
+		err = saveFile(file, filename)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			logger.LogError(logger.GetFuncName(0), err.Error())
 			return
 		}
 
-		err = q.BookATime(time, date, handler.Filename)
+		// getting video duration
+		duration, err := ffmpeg.GetVideoDuration(filename)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			logger.LogError(logger.GetFuncName(0), err.Error())
 			return
 		}
+
+		// creating new record in database
+		err = q.BookATime(time, date, filename, strings.Split(duration.String(), ".")[0])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			logger.LogError(logger.GetFuncName(0), err.Error())
+			return
+		}
+
+		// returning success response
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("time booked"))
+		logger.LogMessage(logger.GetFuncName(0), "time booked")
 
 	}
 }
 
-func saveFile(file multipart.File, handler *multipart.FileHeader) error {
+func saveFile(file multipart.File, filename string) error {
+	logger.LogMessage(logger.GetFuncName(0), "Saving file: "+filename)
 	// Create a new file on the server
-	newFileName := filepath.Join("./video/unprocessed/", handler.Filename) // Adjust the upload directory
+	newFileName := filepath.Join("./video/unprocessed/", filename) // Adjust the upload directory
 	newFile, err := os.Create(newFileName)
 	if err != nil {
 		return fmt.Errorf("Error creating file: %v", err)

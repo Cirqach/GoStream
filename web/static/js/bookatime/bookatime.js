@@ -23,6 +23,7 @@ bookButton.addEventListener('click', () => {
   formData.append('time', time);
   formData.append('videofile', file);
 
+  // TODO: fix no such file error
   // Send the data to the server using fetch
   fetch('/book', {
     method: 'POST',

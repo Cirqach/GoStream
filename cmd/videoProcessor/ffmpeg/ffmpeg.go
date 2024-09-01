@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"strings"
+	"time"
 
 	"github.com/Cirqach/GoStream/cmd/logger"
 )
@@ -28,4 +30,23 @@ func Parse(inputFilePath, outputDirName string) error {
 	}
 	fmt.Println("FFmpeg output: " + string(output))
 	return nil
+}
+
+func GetVideoDuration(filePath string) (time.Time, error) {
+	// using ffprobe for getting video duration
+	cmd := exec.Command("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", "-sexagesimal", filePath)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		logger.LogError(logger.GetFuncName(0), err.Error())
+		return time.Time{}, err
+	}
+	// deleting milliseconds from output
+	duration, err := time.ParseDuration(strings.Split(string(output), ".")[0])
+	if err != nil {
+		logger.LogError(logger.GetFuncName(0), err.Error())
+		return time.Time{}, err
+	}
+	logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("Video duration: %s; returning: %s", duration.String(), time.Time{}.Add(duration)))
+	// returning video duration
+	return time.Time{}.Add(duration), nil
 }

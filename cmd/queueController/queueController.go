@@ -2,7 +2,7 @@ package queuecontroller
 
 import (
 	"fmt"
-	"net/http"
+	"strings"
 	"time"
 
 	"github.com/Cirqach/GoStream/cmd/broadcast"
@@ -85,7 +85,7 @@ func (q *QueueController) controlSchedule() {
 }
 
 // TODO: add good logic for booking time
-func (q *QueueController) BookATfime(wantedTime, date, filename, videoDuration string) error {
+func (q *QueueController) BookATime(wantedTime, date, filename, videoDuration string) error {
 	// Parse the wanted time and date into a Go time object
 	wantedTimeObj, err := time.Parse("HH:mm:ss", wantedTime)
 	if err != nil {
@@ -93,11 +93,11 @@ func (q *QueueController) BookATfime(wantedTime, date, filename, videoDuration s
 	}
 	month, err := time.Parse("2006-01-02", date)
 	if err != nil {
-
+		return err
 	}
 	day, err := time.Parse("2006-01-02", date)
 	if err != nil {
-
+		return err
 	}
 
 	wantedDateTime := time.Date(
@@ -110,16 +110,18 @@ func (q *QueueController) BookATfime(wantedTime, date, filename, videoDuration s
 		0,
 		time.UTC)
 
+	logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("Wanted time: %s, date: %s", wantedDateTime, date))
 	// Check if the wanted time overlaps with any existing broadcast times
-	if err := q.dbController.CheckTimeOverlap(wantedDateTime, videoDuration); err != nil {
-		return err
+	if !q.dbController.CheckTimeOverlap(wantedDateTime, videoDuration) {
+		return fmt.Errorf("Time is not free or overlap with other broadcast")
 	}
 
 	// If the time is free, add the video to the queue
-	err = q.dbController.AddVideoToQueue(filename, wantedDateTime)
+	err = q.dbController.AddVideoToQueue(filename, strings.Split(wantedDateTime.String(), ".")[0])
 	if err != nil {
 		logger.LogError(logger.GetFuncName(0), err.Error())
 		return err
 	}
+	logger.LogMessage(logger.GetFuncName(0), "Video added to queue")
 	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -131,6 +132,47 @@ func (dbc *DatabaseController) VerifyUser(username, password string) bool {
 	return true
 }
 
-func (dbc *DatabaseController) CheckTimeOverlap(time time.Time, duration string) err{
-	_, err := 
+func (dbc *DatabaseController) CheckTimeOverlap(wantedTime time.Time, duration string) bool {
+	// Parse the video duration into hours, minutes, and seconds
+	durationParts := strings.Split(duration, ":")
+	if len(durationParts) != 3 {
+		logger.LogError(logger.GetFuncName(0), "Invalid duration format")
+		return false // Invalid duration format
+	}
+	durationHours, _ := strconv.Atoi(durationParts[0])
+	durationMinutes, _ := strconv.Atoi(durationParts[1])
+	durationSeconds, _ := strconv.Atoi(durationParts[2])
+
+	// Calculate the end time of the wanted broadcast
+	wantedEndTime := wantedTime.Add(
+		time.Duration(durationHours*60+durationMinutes)*
+			(time.Duration(wantedTime.Minute())*time.Minute) +
+			time.Duration(durationSeconds)*
+				(time.Duration(wantedTime.Second())*time.Second))
+	logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("Wanted time: %s, end time: %s", wantedTime, wantedEndTime))
+	// Query the database for existing broadcasts that overlap with the wanted time
+	rows, err := dbc.db.Query("SELECT broadcast_time FROM queue")
+	if err != nil {
+		logger.LogError(logger.GetFuncName(0), "Error querying database: "+err.Error())
+		return false
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var existingBroadcastTime time.Time
+		err := rows.Scan(&existingBroadcastTime)
+		if err != nil {
+			logger.LogError(logger.GetFuncName(0), "Error scanning row: "+err.Error())
+			return false
+		}
+
+		// Check if the wanted time range overlaps with the existing broadcast time
+		if wantedTime.Before(existingBroadcastTime.Add(time.Minute)) && wantedEndTime.After(existingBroadcastTime) {
+			logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("Wanted time overlaps with existing broadcast: %s", existingBroadcastTime))
+			return true // Overlap detected
+		}
+	}
+	logger.LogMessage(logger.GetFuncName(0), "No overlap found")
+	return false // No overlap found
+
 }

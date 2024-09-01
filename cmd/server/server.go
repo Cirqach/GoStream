@@ -72,7 +72,7 @@ func (s *Server) handleRoutes() {
 
 	s.r.Route("/", func(r chi.Router) {
 		r.Use(mw.Auth())
-		r.Post("/book", handler.BookTimeHandler())
+		r.Post("/book", handler.BookTimeHandler(s.q))
 	})
 }
 
@@ -80,15 +80,15 @@ func (s *Server) serveStaticFiles() {
 
 	logger.LogMessage(logger.GetFuncName(0), "Serving static files")
 	s.r.Handle(
-		"/video/processed/",
+		"/video/processed/*",
 		http.StripPrefix("/video/processed/",
 			http.FileServer(http.Dir("./video/processed/"))))
 	s.r.Handle(
-		"/web/static/js/",
+		"/web/static/js/*",
 		http.StripPrefix("/web/static/js/",
 			http.FileServer(http.Dir("./web/static/js/"))))
 	s.r.Handle(
-		"/web/static/css/",
+		"/web/static/css/*",
 		http.StripPrefix("/web/static/css/",
 			http.FileServer(http.Dir("./web/static/css/"))))
 
