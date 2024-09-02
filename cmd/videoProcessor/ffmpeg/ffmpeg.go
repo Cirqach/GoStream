@@ -40,6 +40,8 @@ func GetVideoDuration(filePath string) (time.Time, error) {
 		logger.LogError(logger.GetFuncName(0), "Error getting video duration:"+err.Error())
 		return time.Time{}, err
 	}
+
+	logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("Video duration: %s", string(output)))
 	// deleting milliseconds from output
 	duration, err := time.Parse("15:04:05", strings.Split(string(output), ".")[0])
 	if err != nil {

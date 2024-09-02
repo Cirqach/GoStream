@@ -2,6 +2,7 @@ package queuecontroller
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -87,37 +88,37 @@ func (q *QueueController) controlSchedule() {
 // TODO: add good logic for booking time
 func (q *QueueController) BookATime(wantedTime, date, filename, videoDuration string) error {
 	// Parse the wanted time and date into a Go time object
-	wantedTimeObj, err := time.Parse("HH:mm:ss", wantedTime)
+	wantedTimeSlice := strings.Split(wantedTime, ":")
+	hour, err := strconv.Atoi(wantedTimeSlice[0])
 	if err != nil {
-		return fmt.Errorf("invalid time format: %v", err)
+		return fmt.Errorf("invalid hour time format: %v", err)
 	}
-	month, err := time.Parse("2006-01-02", date)
+	minute, err := strconv.Atoi(wantedTimeSlice[1])
 	if err != nil {
+		return fmt.Errorf("invalid minute time format: %v", err)
+	}
+	second, err := strconv.Atoi(wantedTimeSlice[2])
+	if err != nil {
+		return fmt.Errorf("invalid second time format: %v", err)
+	}
+	wantedDate, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		logger.LogMessage(logger.GetFuncName(0), "Error parsing date:"+err.Error())
 		return err
 	}
-	day, err := time.Parse("2006-01-02", date)
-	if err != nil {
-		return err
-	}
+	logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("Wanted date: %s", wantedDate))
 
-	wantedDateTime := time.Date(
-		time.Now().Year(),
-		month.Month(),
-		day.Day(),
-		wantedTimeObj.Hour(),
-		wantedTimeObj.Minute(),
-		wantedTimeObj.Second(),
-		0,
-		time.UTC)
+	combinedTime := wantedDate.Add(time.Hour*time.Duration(hour) + time.Minute*time.Duration(minute) + time.Second*time.Duration(second))
 
-	logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("Wanted time: %s, date: %s", wantedDateTime, date))
+	logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("Combined time: %s", combinedTime))
+
 	// Check if the wanted time overlaps with any existing broadcast times
-	if !q.dbController.CheckTimeOverlap(wantedDateTime, videoDuration) {
+	if !q.dbController.CheckTimeOverlap(combinedTime, videoDuration) {
 		return fmt.Errorf("Time is not free or overlap with other broadcast")
 	}
 
 	// If the time is free, add the video to the queue
-	err = q.dbController.AddVideoToQueue(filename, strings.Split(wantedDateTime.String(), ".")[0])
+	err = q.dbController.AddVideoToQueue(filename, strings.Split(combinedTime.String(), ".")[0])
 	if err != nil {
 		logger.LogError(logger.GetFuncName(0), err.Error())
 		return err

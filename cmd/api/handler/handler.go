@@ -134,20 +134,25 @@ func BookTimeHandler(q *queuecontroller.QueueController) func(w http.ResponseWri
 
 		videoFilePath := "./video/unprocessed/" + filename
 		// getting video duration
-		duration, err := ffmpeg.GetVideoDuration(videoFilePath)
+		videoDuration, err := ffmpeg.GetVideoDuration(videoFilePath)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			logger.LogError(logger.GetFuncName(0), err.Error())
+			logger.LogError(logger.GetFuncName(0), "Error getting video duration: "+err.Error())
 			return
 		}
 
+		// cutting default time.Time format to only HH:mm:ss
+		duration := strings.Split(videoDuration.String(), " ")[1]
+
 		// creating new record in database
-		err = q.BookATime(time, date, filename, strings.Split(duration.String(), ".")[0])
+		logger.LogMessage(logger.GetFuncName(0), "Creating new record in database with data time: "+time+" and date: "+date+" and duration: "+duration)
+		err = q.BookATime(time, date, filename, duration)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			logger.LogError(logger.GetFuncName(0), err.Error())
+			logger.LogError(logger.GetFuncName(0), "Error booking time: "+err.Error())
 			return
 		}
+		logger.LogMessage(logger.GetFuncName(0), "Time booked successfully")
 
 		// returning success response
 		w.WriteHeader(http.StatusOK)
