@@ -1,7 +1,7 @@
 // Get references to the elements
 const dateInput = document.getElementById('date');
 const timeInput = document.getElementById('time');
-const fileInput = document.getElementById('videofile');
+const fileInput = document.getElementById('file');
 const bookButton = document.getElementById('bookButton');
 
 // Handle the "Book" button click
@@ -21,7 +21,7 @@ bookButton.addEventListener('click', () => {
   const formData = new FormData();
   formData.append('date', date);
   formData.append('time', time);
-  formData.append('videofile', file);
+  formData.append('file', file);
 
   // TODO: fix no such file error
   // Send the data to the server using fetch

@@ -92,7 +92,7 @@ func BookTimeHandler(q *queuecontroller.QueueController) func(w http.ResponseWri
 		}
 		logger.LogMessage(logger.GetFuncName(0), "extracted time: "+time+" and date: "+date)
 		// getting file from request
-		file, handler, err := r.FormFile("videofile") // Replace "file" with the input field name
+		file, handler, err := r.FormFile("file") // Replace "file" with the input field name
 		if err != nil {
 			http.Error(w, "No file uploaded", http.StatusBadRequest)
 			logger.LogError(logger.GetFuncName(0), "No file uploaded: "+err.Error())
@@ -102,10 +102,10 @@ func BookTimeHandler(q *queuecontroller.QueueController) func(w http.ResponseWri
 		defer file.Close()
 
 		// Check if the file format is supported
+		logger.LogMessage(logger.GetFuncName(0), "Checking file format")
 		var supportedFormats = []string{"mp4", "mkv", "avi", "mov", "wmv", "flv", "webm"}
 		extension := strings.Split(handler.Filename, ".")[1]
 		if !func(supportedFormats []string, extension string) bool {
-			logger.LogMessage(logger.GetFuncName(0), "Checking file format")
 			// go in the loop through supported formats
 			for _, format := range supportedFormats {
 				// if format is supported return true
@@ -132,8 +132,9 @@ func BookTimeHandler(q *queuecontroller.QueueController) func(w http.ResponseWri
 			return
 		}
 
+		videoFilePath := "./video/unprocessed/" + filename
 		// getting video duration
-		duration, err := ffmpeg.GetVideoDuration(filename)
+		duration, err := ffmpeg.GetVideoDuration(videoFilePath)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			logger.LogError(logger.GetFuncName(0), err.Error())

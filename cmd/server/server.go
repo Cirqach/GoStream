@@ -17,7 +17,6 @@ import (
 
 var (
 	upgrader = websocket.Upgrader{}
-	Host     = "http://localhost:8080"
 )
 
 // Server struct    struct allow to control all server
@@ -47,6 +46,7 @@ func (s *Server) StartServer() {
 	s.serveStaticFiles()
 	s.handleRoutes()
 
+	logger.LogMessage(logger.GetFuncName(0), "Server lisiting on "+s.ip)
 	err := http.ListenAndServe(":"+strings.Split(s.ip, ":")[2], s.r)
 	if err != nil {
 		logger.Fatal(logger.GetFuncName(0), err.Error())

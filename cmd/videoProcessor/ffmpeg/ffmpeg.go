@@ -37,16 +37,17 @@ func GetVideoDuration(filePath string) (time.Time, error) {
 	cmd := exec.Command("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", "-sexagesimal", filePath)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		logger.LogError(logger.GetFuncName(0), err.Error())
+		logger.LogError(logger.GetFuncName(0), "Error getting video duration:"+err.Error())
 		return time.Time{}, err
 	}
 	// deleting milliseconds from output
-	duration, err := time.ParseDuration(strings.Split(string(output), ".")[0])
+	duration, err := time.Parse("15:04:05", strings.Split(string(output), ".")[0])
 	if err != nil {
-		logger.LogError(logger.GetFuncName(0), err.Error())
+		logger.LogError(logger.GetFuncName(0), "Error parsing video duration:"+err.Error())
 		return time.Time{}, err
 	}
-	logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("Video duration: %s; returning: %s", duration.String(), time.Time{}.Add(duration)))
+
+	logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("Video duration: %s", duration.String()))
 	// returning video duration
-	return time.Time{}.Add(duration), nil
+	return duration, nil
 }
