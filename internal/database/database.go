@@ -57,6 +57,7 @@ func (dbc *DatabaseController) MakeConnection() {
 }
 
 // AddVideoToQueue method    add new video to Queue table
+// Take video file name and date in format "2006-01-02 15:04:05"
 func (dbc *DatabaseController) AddVideoToQueue(fileName, date string) error {
 	logger.LogMessage(logger.GetFuncName(0), "Adding new video record to queue")
 	_, err := dbc.db.Exec(fmt.Sprintf("INSERT INTO queue (path, broadcast_time) VALUES ('%s', '%s');", fileName, date))
@@ -133,6 +134,7 @@ func (dbc *DatabaseController) VerifyUser(username, password string) bool {
 }
 
 func (dbc *DatabaseController) CheckTimeOverlap(wantedTime time.Time, duration string) bool {
+	logger.LogMessage(logger.GetFuncName(0), "Checking time overlap")
 	// Parse the video duration into hours, minutes, and seconds
 	durationParts := strings.Split(duration, ":")
 	if len(durationParts) != 3 {
@@ -142,7 +144,7 @@ func (dbc *DatabaseController) CheckTimeOverlap(wantedTime time.Time, duration s
 	durationHours, _ := strconv.Atoi(durationParts[0])
 	durationMinutes, _ := strconv.Atoi(durationParts[1])
 	durationSeconds, _ := strconv.Atoi(durationParts[2])
-
+	logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("Duration: %d:%d:%d", durationHours, durationMinutes, durationSeconds))
 	// Calculate the end time of the wanted broadcast
 	wantedEndTime := wantedTime.Add(
 		time.Duration(durationHours*60+durationMinutes)*
@@ -161,6 +163,7 @@ func (dbc *DatabaseController) CheckTimeOverlap(wantedTime time.Time, duration s
 	for rows.Next() {
 		var existingBroadcastTime time.Time
 		err := rows.Scan(&existingBroadcastTime)
+		logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("Existing broadcast time: %s", existingBroadcastTime))
 		if err != nil {
 			logger.LogError(logger.GetFuncName(0), "Error scanning row: "+err.Error())
 			return false

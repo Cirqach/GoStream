@@ -113,12 +113,13 @@ func (q *QueueController) BookATime(wantedTime, date, filename, videoDuration st
 	logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("Combined time: %s", combinedTime))
 
 	// Check if the wanted time overlaps with any existing broadcast times
-	if !q.dbController.CheckTimeOverlap(combinedTime, videoDuration) {
+	if q.dbController.CheckTimeOverlap(combinedTime, videoDuration) {
 		return fmt.Errorf("Time is not free or overlap with other broadcast")
 	}
 
+	splitedTime := strings.Split(combinedTime.String(), " ")
 	// If the time is free, add the video to the queue
-	err = q.dbController.AddVideoToQueue(filename, strings.Split(combinedTime.String(), ".")[0])
+	err = q.dbController.AddVideoToQueue(filename, splitedTime[0]+" "+splitedTime[1])
 	if err != nil {
 		logger.LogError(logger.GetFuncName(0), err.Error())
 		return err
