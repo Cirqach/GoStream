@@ -85,19 +85,17 @@ func (q *QueueController) controlSchedule() {
 	}
 }
 
-// TODO: add good logic for booking time
 func (q *QueueController) BookATime(wantedTime, date, filename, videoDuration string) error {
 	// Parse the wanted time and date into a Go time object
-	wantedTimeSlice := strings.Split(wantedTime, ":")
-	hour, err := strconv.Atoi(wantedTimeSlice[0])
+	hour, err := strconv.Atoi(videoDuration[:2])
 	if err != nil {
 		return fmt.Errorf("invalid hour time format: %v", err)
 	}
-	minute, err := strconv.Atoi(wantedTimeSlice[1])
+	minute, err := strconv.Atoi(videoDuration[3:5])
 	if err != nil {
 		return fmt.Errorf("invalid minute time format: %v", err)
 	}
-	second, err := strconv.Atoi(wantedTimeSlice[2])
+	second, err := strconv.Atoi(videoDuration[6:])
 	if err != nil {
 		return fmt.Errorf("invalid second time format: %v", err)
 	}

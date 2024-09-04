@@ -81,6 +81,7 @@ func BookTimeFormHandler(host string) func(w http.ResponseWriter, r *http.Reques
 // BookTimeHandler function    handler for post request for booking time
 func BookTimeHandler(q *queuecontroller.QueueController) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		logger.LogMessage(logger.GetFuncName(0), "received post /book request")
 		// getting values from request form
 		time := r.FormValue("time")
 		date := r.FormValue("date")
