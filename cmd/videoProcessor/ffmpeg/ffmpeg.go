@@ -10,18 +10,18 @@ import (
 	"github.com/Cirqach/GoStream/cmd/logger"
 )
 
-// Parse function    parse video with ffmpeg
-func Parse(inputFilePath, outputDirName string) error {
+// Parse function    parse video with given name from path video/unprocessed/ with ffmpeg
+func Parse(fileName string) error {
 	logger.LogMessage(logger.GetFuncName(0), "Parsing video with ffmpeg")
 	cmd := exec.Command("ffmpeg",
-		"-i", inputFilePath,
+		"-i", fileName,
 		"-c:v", "libx264",
 		"-c:a", "aac",
 		"-hls_time", "10",
 		"-hls_list_size", "0",
 		// "-hls_segment_filename",  fmt.Sprintf("./video/processed/"+ "%s/segment_%03d.ts", outputDirName, ""),
 		"-hls_playlist_type", "vod",
-		fmt.Sprintf("%s/index.m3u8", "./video/processed/"+outputDirName))
+		fmt.Sprintf("%s/index.m3u8", "./video/processed/"+fileName))
 	log.Println("Running FFmpeg: " + cmd.String())
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -34,7 +34,7 @@ func Parse(inputFilePath, outputDirName string) error {
 
 func GetVideoDuration(filePath string) (time.Time, error) {
 	// using ffprobe for getting video duration
-	cmd := exec.Command("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", "-sexagesimal", filePath)
+	cmd := exec.Command("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", "-sexagesimal", "./unprocessed")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		logger.LogError(logger.GetFuncName(0), "Error getting video duration:"+err.Error())

@@ -11,10 +11,11 @@ import (
 	"github.com/Cirqach/GoStream/cmd/videoProcessor/ffmpeg"
 )
 
-// Process function    process given video
-func Process(inputFilePath, outputDirName string) {
-	mkdir(outputDirName)
-	ffmpeg.Parse(inputFilePath, outputDirName)
+// Process function    process video from /video/unprocessed/ with given name
+func Process(fileName string) error {
+	mkdir(fileName)
+	err := ffmpeg.Parse(fileName)
+	return err
 
 }
 

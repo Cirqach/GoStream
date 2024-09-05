@@ -15,6 +15,7 @@ import (
 	"github.com/Cirqach/GoStream/cmd/broadcast"
 	"github.com/Cirqach/GoStream/cmd/logger"
 	queuecontroller "github.com/Cirqach/GoStream/cmd/queueController"
+	videoprocessor "github.com/Cirqach/GoStream/cmd/videoProcessor"
 	"github.com/Cirqach/GoStream/cmd/videoProcessor/ffmpeg"
 	"github.com/Cirqach/GoStream/internal/auth"
 	"github.com/Cirqach/GoStream/internal/database"
@@ -134,6 +135,14 @@ func BookTimeHandler(q *queuecontroller.QueueController) func(w http.ResponseWri
 		}
 
 		videoFilePath := "./video/unprocessed/" + filename
+
+		// processing video
+		err = videoprocessor.Process(filename)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			logger.LogError(logger.GetFuncName(0), "Error processing video: "+err.Error())
+			return
+		}
 		// getting video duration
 		videoDuration, err := ffmpeg.GetVideoDuration(videoFilePath)
 		if err != nil {

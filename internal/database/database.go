@@ -17,13 +17,6 @@ const (
 	port = "5432"
 )
 
-// Video struct    allow access to queue table with video schedule
-type Video struct {
-	Id   string
-	Path string
-	Time string
-}
-
 // DatabaseController struct    allow access to dabase
 type DatabaseController struct {
 	db *sql.DB
@@ -93,12 +86,23 @@ func (dbc *DatabaseController) GetSoonerVideo() (Video, error) {
 	video := Video{}
 
 	for videoRow.Next() {
-		if err = videoRow.Scan(&video.Id, &video.Path, &video.Time); err != nil {
+		if err = videoRow.Scan(&video.Id, &video.Name, &video.Time); err != nil {
 			logger.LogError(logger.GetFuncName(0), fmt.Sprintf("Error due scanning: %s", err))
 		}
 	}
 	logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("Sooner video: %s", video))
 	return video, nil
+}
+
+func (dbc *DatabaseController) DeleteSoonerVideo(v Video) error {
+	logger.LogMessage(logger.GetFuncName(0), "Getting sooner video")
+	result, err := dbc.db.Exec("DELETE 1 FROM queue WHERE id = ?;", v.Id)
+	if err != nil {
+		logger.LogError(logger.GetFuncName(0), err.Error())
+		return err
+	}
+	logger.LogMessage(logger.GetFuncName(0), fmt.Sprintf("Result deleting sooner video: %s", result))
+	return nil
 }
 
 // ClearQueue method    delete rows from database which older than time.Now()

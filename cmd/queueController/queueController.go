@@ -14,7 +14,7 @@ import (
 // QueueController struct    struct allow to control the video queue
 type QueueController struct {
 	dbController *database.DatabaseController
-	c            chan database.Video
+	c            chan database.Video // channel containing next video for broadcast
 }
 
 // NewQueueController function    create new queue controller
@@ -25,63 +25,40 @@ func NewQueueController(dbController *database.DatabaseController) *QueueControl
 	}
 }
 
+// TODO: fix 'http://localhost:8080/processed/./video/unprocessed/1.mp4/index.m3u8'); error
 // StartControlling method    start controling schedule and update "broadcast"
 func (q *QueueController) StartControlling(b *broadcast.Engine) {
 	if err := q.dbController.ClearQueue(); err != nil {
 		logger.LogError(logger.GetFuncName(0), "error clearing queue"+err.Error())
 	}
-	go q.controlSchedule()
-	go b.UpdateVideo(q.c)
+	go q.controlSoonerVideo()
+	go q.controlTime(b)
+
 }
 
-// TODO: fix infinite loop
-// controlSchedule method    controling video schedule
-func (q *QueueController) controlSchedule() {
+func (q *QueueController) controlTime(b *broadcast.Engine) {
+	video := <-q.c
+
+	if video.Time != time.Now().Format("2007-08-05 15:04:05") {
+		b.UpdateVideo(video)
+	}
+	time.Sleep(1 * time.Second)
+}
+
+func (q *QueueController) controlSoonerVideo() {
 	for {
-		// 1. Get the sooner video and its scheduled broadcast time
+		time.Sleep(5 * time.Second)
 		video, err := q.dbController.GetSoonerVideo()
 		if err != nil {
+			logger.LogError(logger.GetFuncName(0), "error getting sooner video: "+err.Error())
 
-			logger.LogError(logger.GetFuncName(0), err.Error())
-			time.Sleep(time.Second * 10)
-			continue // Move on to the next iteration in case of error
+		} else {
+			err = q.dbController.DeleteSoonerVideo(video)
+			if err != nil {
+				logger.LogError(logger.GetFuncName(0), "error deleting sooner video: "+err.Error())
+			}
 		}
-
-		if video == (database.Video{}) {
-			logger.LogMessage(logger.GetFuncName(0), "No videos in queue")
-			time.Sleep(time.Second * 10)
-			continue
-		}
-
-		// 2. Calculate the duration until broadcast time
-		now := time.Now()
-		t, err := time.Parse(time.RFC3339, video.Time)
-		if err != nil {
-			logger.LogError(logger.GetFuncName(0), err.Error())
-			time.Sleep(time.Second * 10)
-			continue
-		}
-
-		// Handle cases for broadcast time already passed or in the future
-		if now.After(t) {
-			// Broadcast time has already passed, send the video immediately
-			q.c <- video
-			continue
-		}
-		duration := t.Sub(now)
-
-		// 3. Use time.After to create a timer for the remaining duration
-		timer := time.After(duration)
-
-		// 4. Select on the channel `c` and the timer for control flow
-		select {
-		case <-q.c:
-			// Another video might have been pushed to the queue, handle it
-			continue
-		case <-timer:
-			// Broadcast time reached, send the video for switching
-			q.c <- video
-		}
+		q.c <- video
 	}
 }
 

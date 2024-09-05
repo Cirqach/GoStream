@@ -21,10 +21,9 @@ func NewEngine() *Engine {
 
 // TODO: need to create time changing for videos
 // UpdateVideo method    livetime video update
-func (b *Engine) UpdateVideo(c chan database.Video) {
+func (b *Engine) UpdateVideo(v database.Video) {
 	logger.LogMessage(logger.GetFuncName(0), "Start updating video")
-	video := <-c
-	logger.LogMessage(logger.GetFuncName(0), "Updating video: "+video.Path)
+	logger.LogMessage(logger.GetFuncName(0), "Updating video: "+v.Name)
 	b.Hub.Stream <- []byte(`
 	<div hx-swap-oob="innerHTML:#video-div">
 	<video id="video" controls autoplay></video>
@@ -34,7 +33,7 @@ func (b *Engine) UpdateVideo(c chan database.Video) {
 	    if(Hls.isSupported()) {
 	    var video = document.getElementById('video');
 	    var hls = new Hls();
-	    hls.loadSource('http://localhost:8080/` + video.Path + `/index.m3u8');
+	    hls.loadSource('http://localhost:8080/processed/` + v.Name + `/index.m3u8');
 	    hls.attachMedia(video);
 	    hls.on(Hls.Events.MANIFEST_PARSED,function
 	      video.play();
